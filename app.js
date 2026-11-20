@@ -737,8 +737,8 @@ const SHIRTS = ['#e8b23a', '#3f7cc4', '#c8553d', '#4fa36b', '#8c5fc4', '#e36f9b'
 const ROOFS = ['#e2475a', '#9b5de5', '#f15bb5', '#ff9f1c', '#3fb6b0', '#ffd166'];
 const cleanHandle = (s) => String(s || '').trim().replace(/^@+/, '').toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 30);
 function traits(h, pos) {
-  const n = roll(h, 'breed', 1000); const breed = n < 10 ? 8 : Math.min(7, Math.floor((n - 10) / (990 / 8)));
-  const rarity = breed === 8 ? 'LEGENDARY' : roll(h, 'shiny', 100) < 8 ? 'RARE' : 'COMMON';
+  const n = roll(h, 'breed', 1000); const breed = n < 200 ? 8 : Math.min(7, Math.floor((n - 200) / (800 / 8)));   // 20% Star Pup (legendary)
+  const rarity = breed === 8 ? 'LEGENDARY' : roll(h, 'shiny', 100) < 50 ? 'RARE' : 'COMMON';                 // rest: 40% rare, 40% common
   const name = pickH(h, 'name', DOG_NAMES);
   return { h, pos, breed: breed % 9, breedName: BREED_NAMES[breed % 9], rarity, dogName: name, quirk: pickH(h, 'quirk', QUIRKS),
     skin: pickH(h, 'skin', SKINS), hair: pickH(h, 'hair', HAIRS), shirt: pickH(h, 'shirt', SHIRTS), pants: pickH(h, 'pants', ['#2f3b5a', '#5e6266', '#2f3b32', '#3b4a6b']),
