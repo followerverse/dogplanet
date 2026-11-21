@@ -34,10 +34,12 @@
   @media (max-width: 400px) { form button { padding: 10px 12px; font-size: 15px; } h1 { font-size: 34px; } }
   html, body { overflow-x: hidden; }
   footer { text-align: center; font-size: 13px; color: #b9a8e6; padding: 14px 16px 26px; }
+  .updated { text-align: center; font-size: 13px; line-height: 1.45; color: #b9a8e6; padding: 2px 18px 8px; } .updated b { color: #F5C542; font-weight: normal; } #lastup { display: block; white-space: nowrap; }
 </style></head>
 <body><div class="app">
   <header><h1>DOG PLANET</h1><div class="by">by @followerverse · every follower gets a dog</div></header>
   <form id="form" autocomplete="off"><label class="in"><span>@</span><input id="who" placeholder="your instagram username" autocapitalize="none" spellcheck="false" maxlength="30"></label><button type="submit">Find my dog</button></form>
+  <div id="updated" class="updated"><b>🕒 IDs update once a day</b><span id="lastup"></span>Just followed? Your ID shows up after the next update.</div>
   <div class="stagewrap"><canvas id="gl"></canvas></div>
   <div id="card" hidden>
     <div class="row1"><div id="cid"></div><div id="badge" class="badge"></div></div>
@@ -50,4 +52,6 @@
     <button id="save" type="button">Save my Planet ID 📸</button>
   </div>
   <footer>Your dog is the same every time: nobody can pick theirs.<br>Comment DOG on the reel 🐶</footer>
-</div><script type="module" src="./app.js"></script></body></html>
+</div><script>fetch('./followers.json').then(r => r.json()).then(d => { if (!d.updated) return;
+  const t = new Date(d.updated).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  document.getElementById('lastup').textContent = 'Last update: ' + t.replace(' AM', ' am').replace(' PM', ' pm') + ' CT'; }).catch(() => {});</script><script type="module" src="./app.js"></script></body></html>
