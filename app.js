@@ -1148,5 +1148,11 @@ function frame() {
   renderer.render(world, cam); requestAnimationFrame(frame);
 }
 frame();
-if (QS.get('u')) find(QS.get('u'));
+// start screen: a hologram of "you" and your dog, so the page is never empty
+function demoStage() { const T = traits('your_name', null); buildStage(T);
+  stage.remove(ACT.dog); scene = stage; ACT.dog = dog({ breed: 2, pose: 'sit', x: 0.6, z: -0.05, ry: FACE + 0.15, size: 1.15, headUp: 0.15 }); scene = world;
+  ACT.dog.traverse(o => { if (o.isMesh) { o.material = holoMat; o.castShadow = false; } }); ACT.mode = 'wag';
+  const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map: nameTex('THIS COULD BE YOU', { w: 640, h: 110, bg: 'rgba(20,40,90,0.78)', fg: '#d9fbff', border: '#7ff3ff' }), transparent: true, depthTest: false }));
+  tag.scale.set(2.3, 0.4, 1); tag.position.set(0.05, 2.35, -0.2); stage.add(tag); }
+if (QS.get('u')) find(QS.get('u')); else demoStage();
 window.ready = true; window.storyCard = storyCard;
