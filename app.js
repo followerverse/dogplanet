@@ -711,6 +711,267 @@ function canopy(seed, blobs = 11, size = 1) {
 }
 function trunkGeo(h, r0, r1, seed) { const g = new THREE.CylinderGeometry(r1, r0, h, 9, 4); const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) { const y = p.getY(i) / h + 0.5; p.setX(i, p.getX(i) + Math.sin(y * 2.5 + seed) * 0.08 * y); } g.translate(0, h / 2, 0); return shadeGeo(g, 0, h, 0.55, 1, seed); }
+// ================================================================= comment requests from the Dog Planet reel (21-22 Nov 2026)
+// Toy/cartoon versions only. The public copy stores the handles as scrambled codes (build_public.py).
+// breed presets: coat colours + ears + an extra shape that sells the breed
+const XBREEDS = {
+  husky: { name: 'Husky', coat: '#66717f', coat2: '#ffffff', ears: 'point', extra: 'brows' },
+  pug: { name: 'Pug', coat: '#dcbd8e', coat2: '#ead2a8', ears: 'flop', extra: 'pug' },
+  shepherd: { name: 'German Shepherd', coat: '#c98a45', coat2: '#e7b980', ears: 'point', extra: 'saddle' },
+  pom: { name: 'Pomeranian', coat: '#f0a24c', coat2: '#ffdcae', ears: 'point', extra: 'fluff' },
+  pomtan: { name: 'Pomeranian (tan & white)', coat: '#d9a66a', coat2: '#ffffff', ears: 'point', extra: 'fluff' },
+  shihtzu: { name: 'Shih Tzu', coat: '#f4ece2', coat2: '#c9a27a', ears: 'flop', extra: 'fluff' },
+  beagle: { name: 'Beagle', coat: '#c47c3c', coat2: '#ffffff', ears: 'flop', extra: 'saddle' },
+  blacklab: { name: 'Black Labrador', coat: '#2a2523', coat2: '#3d3633', ears: 'flop' },
+  pitbull: { name: 'Pitbull', coat: '#8d939d', coat2: '#f2f2f2', ears: 'point', extra: 'broad' },
+  yorkie: { name: 'Yorkie', coat: '#4c525e', coat2: '#c9925a', ears: 'point', extra: 'fluff' },
+  canecorso: { name: 'Cane Corso', coat: '#3c3c41', coat2: '#56565c', ears: 'point', extra: 'broad' },
+  indie: { name: 'Indie Dog', coat: '#c98b52', coat2: '#f2d8b4', ears: 'point' },
+  tang: { name: 'Tang Dog', coat: '#d39a5a', coat2: '#f6e2c4', ears: 'point' },
+  mongolian: { name: 'Mongolian Shepherd', coat: '#211c1a', coat2: '#c47a3a', ears: 'flop', extra: 'fluff' },
+  fila: { name: 'Brazilian Fila', coat: '#a5672f', coat2: '#7a4a22', ears: 'flop', extra: 'jowls' },
+};
+const XCOATS = {
+  pink: { coat: '#ff9ec7', coat2: '#ffe3f0', name: 'Pink Pup' }, lightpink: { coat: '#ffc4dd', coat2: '#fff0f6', name: 'Light Pink Pup' },
+  blue: { coat: '#5aa9ff', coat2: '#d8ecff', name: 'Blue Pup' }, green: { coat: '#6fd36f', coat2: '#e2f8de', name: 'Green Pup' },
+  brownspots: { coat: '#8a5a34', coat2: '#d9b38a', spots: '#1a1410', name: 'Brown Pup with black spots' },
+  brownblack: { coat: '#6b4430', coat2: '#1e1a18', name: 'Brown & Black Pup' },
+  white: { coat: '#fbf8f2', coat2: '#ffffff', name: 'Light Pup' }, rainbow: { coat: '#ff8ac6', coat2: '#fff2b0', name: 'Rainbow Pup' },
+};
+const SPECIAL = {
+  // dog breeds
+  '#e83975ad0aeedf6a': { breed: 'husky', label: 'A husky 🐺' },
+  '#e5f37dd6de908df8': { breed: 'husky', label: 'A husky, in memory of yours 🤍' },
+  '#6faa60d932ac08fe': { breed: 'pug', label: 'A pug 🐶' },
+  '#25a1d2eb4757e127': { breed: 'shepherd', label: 'A German Shepherd' },
+  '#d3f8dd55db7fe876': { breed: 'shepherd', label: 'A German Shepherd' },
+  '#50ee41c73d9ea396': { breed: 'pom', label: 'A Pomeranian' },
+  '#e5a4b25ec3a41a99': { breed: 'pomtan', label: 'A tan & white Pomeranian' },
+  '#de25c4bb618c755d': { breed: 'shihtzu', label: 'A shih tzu' },
+  '#6279843d12da0118': { breed: 'shihtzu', label: 'A shih tzu, like your puppy' },
+  '#68727d0ccc73840b': { breed: 'shihtzu', name: 'Spark', label: 'A shih tzu named Spark ⚡' },
+  '#7007eb50d3de26ba': { breed: 'beagle', label: 'A beagle' },
+  '#93db38123b3268c9': { breed: 'blacklab', name: 'Cookie', gear: ['flashcollar'], label: 'A black Labrador named Cookie, with a flashlight collar 🔦' },
+  '#423217901d81134a': { breed: 'pitbull', label: 'A pitbull' },
+  '#2b43582027462b70': { breed: 'yorkie', label: 'A yorkie, like yours' },
+  '#8265ad73925f49d7': { breed: 'canecorso', label: 'A Cane Corso, like your puppy' },
+  '#cbb4ae2994ef1e27': { breed: 'indie', label: 'An indie dog 🥺' },
+  '#b222bb0fabe2273e': { breed: 'tang', label: 'A Tang dog' },
+  '#cc1361bea7b3510c': { breed: 'mongolian', label: 'A Mongolian shepherd' },
+  '#578169f9cf16d2dd': { breed: 'fila', label: 'A Brazilian dog (Fila)' },
+  // coats
+  '#95d04f8b4b865315': { coat: 'pink', gear: ['bow'], label: 'A cute pink dog 🎀' },
+  '#8ce36f7f9489f8ce': { coat: 'lightpink', label: 'A light pink dog' },
+  '#840d9877063ea2fb': { coat: 'rainbow', label: 'A rainbow dog 🌈' },
+  '#4e65eb6d3c979e95': { coat: 'blue', label: 'A blue dog 💙' },
+  '#7aad9589e6b5606c': { coat: 'green', label: 'A green dog 💚' },
+  '#d6dc7bb02e93a042': { coat: 'brownspots', label: 'Brown with black spots' },
+  '#33e108f03e7339dd': { coat: 'brownblack', label: 'A brown & black mix' },
+  '#3e25e9fd13553a46': { star: true, gear: ['sparkle'], label: 'A space dog with glowing stars on its coat ✨' },
+  '#daaea926f7ae634b': { coat: 'white', gear: ['glow'], house: ['bright'], label: 'A light dog and a bright house ✨' },
+  // dog gear
+  '#ce96d9f898c633bb': { gear: ['tophat'], label: 'A tiny top hat 🎩' },
+  '#3eb2069d750b04b2': { gear: ['bow'], label: 'The cutest face (and a bow) 🎀' },
+  '#1e164fb2eaf1e08e': { gear: ['bow'], label: 'The cutest dog 🎀' },
+  '#f636e4f0996dcc1d': { gear: ['halo', 'glow'], label: 'A dog god 😇' },
+  '#ca7b946e76600e5f': { gear: ['armor'], fig: 'flashlight', label: 'A protector dog in armor + a big light 🛡️' },
+  '#c52ccbb469d041f3': { gear: ['muscle'], label: 'A dog with muscles 💪' },
+  '#9a6dd07bdc3b1835': { gear: ['armor'], label: 'Indestructible armor 🛡️' },
+  '#dc54143ab36b295d': { gear: ['armor'], label: 'Dog armor 🛡️' },
+  '#aebc461e98e9ff77': { gear: ['diamond'], label: 'Diamond armor 💎' },
+  '#d8e78a5490702645': { gear: ['sword'], label: 'A sword of light ⚔️' },
+  '#4a6d85493d0638ff': { gear: ['sword'], label: 'A very sharp light sword (monsters only) ⚔️' },
+  '#a7c21733bc5f764a': { gear: ['collar'], label: 'A collar made of light' },
+  '#a2b042fc451f908c': { gear: ['wings'], label: 'A dragon-rider dog 🐉' },
+  '#ff74a0ff0218999e': { gear: ['wings'], label: 'Part dragon 🐉' },
+  '#80b261dddbfd47db': { gear: ['heads3'], label: 'A mini three-headed dog 🐶🐶🐶' },
+  '#05a6a6c3a95713da': { gear: ['cape'], label: 'A superhero dog 🦸' },
+  '#59b122662f2bffaa': { coat: 'green', gear: ['spikes'], label: 'A dino dog 🦖' },
+  '#827b45cd90707721': { coat: 'green', gear: ['muscle'], fig: 'hero', label: 'A superhero + a big green dog 💪' },
+  '#c4c14eb10adacc38': { gear: ['glow'], fig: 'glow', label: 'You and your dog with light powers ✨' },
+  // more dogs
+  '#21d459a39f8abd6c': { dogs: 2, label: 'Two dogs 🐶🐶' },
+  '#48f1128df80c6ab5': { dogs: 6, label: 'Six dogs 🐶🐶🐶🐶🐶🐶' },
+  '#8d681bab6dfe5345': { dogs: 4, label: 'ALL of them (well, four) 🐶' },
+  // names
+  '#3a350a4693fd1b4e': { name: 'Bruno', label: 'Your dog is called Bruno 🤍' },
+  '#4276efc98f0cfffd': { name: 'Bobik', label: 'Your dog is called Bobik' },
+  // houses
+  '#2342fb3d718bdbe5': { house: ['fairy'], label: 'A house full of fairy lights ✨' },
+  '#6b3b4588a1ceb053': { house: ['golden'], label: 'A golden shelter for you and your dog' },
+  '#28cd75383a61466d': { house: ['pink'], label: 'A cute pink house' },
+  '#8f34b633666a1ef9': { house: ['bright'], label: 'A REALLY bright house 💡' },
+  '#542b366031054de5': { house: ['bright', 'fairy'], label: 'The brightest house on the planet 💡' },
+  '#77e455f449eb1f33': { house: ['mansion', 'bright'], label: 'The biggest house with the biggest light' },
+  '#e8aef55ab73e35e6': { house: ['mansion'], label: 'A mansion for your dog' },
+  '#17826c578179c74d': { house: ['mansion'], label: 'A mansion for your dog' },
+  '#6dfe38db5a3b02fb': { house: ['mansion', 'pink', 'fairy'], label: 'A giant pink lighted house for the cuties' },
+  '#db5061a1d38a16e4': { house: ['blue', 'flowers'], label: 'A blue house with a flower window 🌸' },
+  '#5c8a2ce721e5c75a': { house: ['cherry'], label: 'A cherry blossom tree 🌸' },
+  '#0083b601896cfddf': { house: ['vip'], label: 'The VIP area 💎' },
+  '#7fc8a3e6556ea14a': { house: ['wall'], label: 'A thick wall to protect everyone' },
+  '#a2f23c7101098d13': { house: ['wall', 'bright'], label: 'Thick walls + light towers on the roof' },
+  '#644a1ddfc4ad4724': { house: ['barrier'], label: 'A protection barrier 🛡️' },
+  '#b445c05171e9f73f': { gear: ['armor'], house: ['fairy'], label: 'A shelter with lights + armor' },
+  '#802ca8e172470528': { house: ['school'], label: 'A school where dogs learn to protect themselves 🏫' },
+  '#eeb665b90e1edba9': { house: ['shop', 'bright'], label: 'A shop that sells lights 💡' },
+  // you (the owner)
+  '#39c117e16373992a': { fig: 'princess', label: 'A princess 👑' },
+  '#e3778638119a3d9d': { fig: 'princess', label: 'The dog princess who takes care of dogs 👑' },
+  '#5428b66467009c93': { fig: 'nurse', label: 'A dog nurse 🩹' },
+  '#0b975b5835e17bff': { fig: 'nurse', label: 'A healer 🩹' },
+  '#b1895e6130d6b393': { fig: 'military', label: 'A military man and a dog' },
+  '#6d38485f2c35abda': { fig: 'mage', label: 'A mage who summons a big light 🪄' },
+  '#93df2c27f97fbe4e': { fig: 'builder', label: 'A construction worker who builds lights 👷' },
+  '#6baa6678f47183b6': { fig: 'flashlight', label: 'A big bang flashlight 🔦' },
+  '#2bdcac023cdb9a66': { fig: 'flashlight', label: 'A big flashlight so the monsters run 🔦' },
+  '#2176e3b560d2c2c5': { fig: 'flashlight', label: 'A strong light 🔦' },
+  '#e05370bc52415770': { fig: 'flashlight', label: 'A huge flashlight 🔦' },
+  '#e4c0f1a107fdcf94': { fig: 'hero', label: 'The hero who protects them 🦸' },
+  '#b8de80393dc9043d': { fig: 'hero', label: 'A superhero warrior 🦸' },
+  '#076a6d894ec0ad14': { fig: 'glow', label: 'A glowing human ✨' },
+  '#1da9b7c61a9e1b8f': { fig: 'armor', gear: ['wings'], label: 'Dragon armor + a dragon dog 🐉' },
+  '#f24f1fbf3178ed9c': { fig: 'catsamurai', label: 'A cat samurai 🐱' },
+  '#4f537717221cd3f3': { fig: 'teacher', house: ['school'], label: 'A teacher at the dog school 🏫' },
+  '#676ee61e80facbdf': { fig: 'penguin', label: 'A penguin warrior 🐧' },
+};
+function reqOf(h) { return SPECIAL[h] || SPECIAL['#' + sha256js(new TextEncoder().encode('dogplanet-req' + h)).slice(0, 16)] || null; }
+const XIDX = {};
+function xBreed(def, ears) { const k = JSON.stringify([def.coat, def.coat2, def.spots || null, ears]); if (XIDX[k] == null) { BREEDS.push({ coat: def.coat, coat2: def.coat2, ears, spots: def.spots }); XIDX[k] = BREEDS.length - 1; } return XIDX[k]; }
+function applyReq(T) {   // called by traits(): breed / coat / name / house colours
+  const sp = T.pos ? reqOf(T.h) : null; T.special = sp; if (!sp) return T;
+  if (sp.breed) { const b = XBREEDS[sp.breed]; T.breed = xBreed(b, b.ears); T.breedName = b.name; T.xb = sp.breed; }
+  if (sp.coat) { const c = XCOATS[sp.coat], ears = (BREEDS[T.breed] || BREEDS[0]).ears || 'flop'; T.breed = xBreed(c, ears); T.breedName = c.name; }
+  if (sp.star) { T.breed = 8; T.breedName = BREED_NAMES[8]; T.rarity = 'LEGENDARY'; }
+  if (sp.name) T.dogName = sp.name;
+  const H = sp.house || [];
+  if (H.includes('pink')) { T.roof = '#ff7eb6'; T.wall = '#ffe0ee'; }
+  if (H.includes('blue')) { T.roof = '#3f7cc4'; T.wall = '#dff1ff'; }
+  if (H.includes('golden')) { T.roof = '#f2c14e'; T.wall = '#fff6d6'; }
+  return T;
+}
+const GLOWM = (c, i = 1.4) => new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: i, roughness: 0.3, toneMapped: false });
+const METAL = (c) => std({ color: c, metalness: 0.75, roughness: 0.28 });
+function signPlane(text, w, h, parent, x, y, z, opts = {}) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: nameTex(text, { w: 512, h: Math.round(512 * h / w), ...opts }), toneMapped: false, side: THREE.DoubleSide })); m.position.set(x, y, z); parent.add(m); return m; }
+// ---------------------------------------------------------------- the dog
+function dressDog(d, T) {
+  const sp = T.special || {}, U = d.userData, head = U.head, body = U.body, G = sp.gear || [], B = BREEDS[T.breed] || BREEDS[0], extra = T.xb && XBREEDS[T.xb].extra;
+  const coatM = std({ color: B.coat, roughness: 0.95 }), coat2M = std({ color: B.coat2, roughness: 0.95 });
+  // breed shapes
+  if (extra === 'brows') for (const s of [-1, 1]) mesh(SPH(0.04, 12), coat2M, head, 0.23, 0.15, s * 0.11).scale.set(0.7, 0.5, 1.1);
+  if (extra === 'pug') { mesh(SPH(0.13, 24), std({ color: '#3a2c26', roughness: 0.6 }), head, 0.225, -0.085, 0).scale.set(0.95, 0.7, 1.05); mesh(new THREE.TorusGeometry(0.1, 0.012, 6, 16, Math.PI), std({ color: shade(B.coat, 0.7) }), head, 0.2, 0.16, 0).rotation.set(0, Math.PI / 2, 0); }
+  if (extra === 'saddle') mesh(SPH(0.24, 24), std({ color: shade(B.coat, 0.32), roughness: 0.95 }), body, -0.06, 0.53, 0).scale.set(1.45, 0.55, 1.02);
+  if (extra === 'fluff') { for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; mesh(SPH(0.1, 12), coatM, head, -0.08, Math.cos(a) * 0.24 - 0.06, Math.sin(a) * 0.26); } }
+  if (extra === 'broad') head.scale.set(1.08, 1.0, 1.16);
+  if (extra === 'jowls') for (const s of [-1, 1]) mesh(SPH(0.07, 14), coat2M, head, 0.24, -0.2, s * 0.07).scale.set(1, 1.3, 0.8);
+  if (sp.coat === 'rainbow') { const cols = ['#ff6b6b', '#ffa94d', '#ffe066', '#69db7c', '#4dabf7', '#b197fc']; let i = 0;
+    body.traverse(o => { if (o.isMesh && o.material && o.material.map && o.geometry.type !== 'SphereGeometry') { o.material = std({ color: cols[i++ % cols.length], roughness: 0.8 }); } });
+    for (let k = 0; k < 6; k++) mesh(SPH(0.06, 10), std({ color: cols[k] }), body, -0.25 + k * 0.09, 0.62, 0).scale.set(1, 0.5, 1.6); }
+  // gear
+  if (G.includes('tophat')) { const hat = new THREE.Group(); hat.position.set(0.0, 0.3, 0.05); hat.rotation.x = -0.2; head.add(hat);
+    mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.02, 24), std({ color: '#151518', roughness: 0.4 }), hat); mesh(new THREE.CylinderGeometry(0.09, 0.095, 0.17, 24), std({ color: '#151518', roughness: 0.4 }), hat, 0, 0.095, 0);
+    mesh(new THREE.CylinderGeometry(0.097, 0.097, 0.035, 24), std({ color: '#c8323c' }), hat, 0, 0.03, 0); }
+  if (G.includes('bow')) for (const s of [-1, 1]) { const c = mesh(new THREE.ConeGeometry(0.06, 0.11, 12), std({ color: '#ff5fa2', roughness: 0.4 }), head, 0.02, 0.29, 0.16 + s * 0.055); c.rotation.x = s * Math.PI / 2; }
+  if (G.includes('bow')) mesh(SPH(0.03, 10), std({ color: '#ff5fa2' }), head, 0.02, 0.29, 0.16);
+  if (G.includes('halo')) { const h = mesh(new THREE.TorusGeometry(0.15, 0.022, 8, 28), GLOWM('#ffd84a', 2), head, -0.02, 0.48, 0); h.rotation.x = Math.PI / 2; h.castShadow = false; }
+  if (G.includes('collar') || G.includes('flashcollar')) { const cg = new THREE.Group(); cg.position.set(0.34, 0.6, 0); cg.rotation.z = -0.75; body.add(cg); const c = mesh(new THREE.TorusGeometry(0.2, 0.045, 10, 32), G.includes('collar') ? GLOWM('#7ff3ff', 1.6) : std({ color: '#d63c3c' }), cg); c.rotation.y = Math.PI / 2;
+    if (G.includes('flashcollar')) { const f = new THREE.Group(); f.position.set(0.12, -0.2, 0); f.rotation.z = 0.75; f.scale.setScalar(1.5); cg.add(f); mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.1, 14), std({ color: '#2b2d31', metalness: 0.5 }), f).rotation.z = Math.PI / 2;
+      mesh(new THREE.CircleGeometry(0.04, 14), GLOWM('#fff6c0', 2.5), f, 0.052, 0, 0).rotation.y = Math.PI / 2; const fg = sprite('#fff6c0', 0.35, V3(0.06, 0, 0), 0.9); f.add(fg); } }
+  if (G.includes('armor') || G.includes('diamond')) { const M = G.includes('diamond') ? new THREE.MeshStandardMaterial({ color: '#7fe8ff', emissive: '#2aa7c9', emissiveIntensity: 0.35, metalness: 0.4, roughness: 0.08, transparent: true, opacity: 0.92 }) : METAL('#c9d1db');
+    const ag = new THREE.CapsuleGeometry(0.25, 0.24, 8, 20); ag.rotateZ(Math.PI / 2); mesh(ag, M, body, -0.02, 0.45, 0).scale.set(0.9, 0.82, 1.0);
+    mesh(new THREE.SphereGeometry(0.315, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.42), M, head, -0.02, 0.02, 0); mesh(new THREE.BoxGeometry(0.05, 0.12, 0.04), M, head, 0.28, 0.07, 0); }
+  if (G.includes('sword')) { const s = new THREE.Group(); s.position.set(-0.05, 0.5, 0.27); s.rotation.set(0.25, 0, -0.9); body.add(s);
+    mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.14, 10), std({ color: '#3a2a1e' }), s); mesh(new THREE.BoxGeometry(0.16, 0.025, 0.04), METAL('#f5c542'), s, 0, 0.08, 0);
+    const b = mesh(new THREE.BoxGeometry(0.035, 0.62, 0.012), GLOWM('#9ff6ff', 2.2), s, 0, 0.4, 0); b.castShadow = false; }
+  if (G.includes('wings')) for (const sd of [-1, 1]) { const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(0.55, 0.3); sh.lineTo(0.45, 0.08); sh.lineTo(0.38, 0.16); sh.lineTo(0.3, -0.02); sh.lineTo(0.2, 0.06); sh.lineTo(0, 0);
+    const w = new THREE.Mesh(new THREE.ShapeGeometry(sh), std({ color: '#7d4fd6', roughness: 0.6, side: THREE.DoubleSide })); w.castShadow = true; w.position.set(-0.05, 0.6, sd * 0.12); w.rotation.set(sd * 1.1, 0, 0.35); w.scale.z = sd; body.add(w); }
+  if (G.includes('cape')) { const c = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 0.75, 8, 6), std({ color: '#d6333d', roughness: 0.7, side: THREE.DoubleSide })); const p = c.geometry.attributes.position;
+    for (let i = 0; i < p.count; i++) p.setZ(i, -Math.pow(Math.abs(p.getX(i)), 1.5) * 0.6 - (0.375 - p.getY(i)) * 0.15); c.geometry.computeVertexNormals(); c.rotation.y = -Math.PI / 2; c.position.set(-0.12, 0.52, 0); body.add(c);
+    mesh(new THREE.BoxGeometry(0.06, 0.06, 0.02), METAL('#f5c542'), head, -0.1, -0.22, 0.17); }
+  if (G.includes('spikes')) { for (let i = 0; i < 6; i++) mesh(new THREE.ConeGeometry(0.06, 0.2, 8), std({ color: '#f5c542' }), body, 0.2 - i * 0.09, 0.68, 0); for (let i = 0; i < 3; i++) mesh(new THREE.ConeGeometry(0.05, 0.16, 8), std({ color: '#f5c542' }), head, -0.08 + i * 0.07, 0.3 - i * 0.02, 0).rotation.z = -0.3; }
+  if (G.includes('muscle')) { mesh(SPH(0.15, 16), coatM, body, 0.18, 0.45, 0.12).scale.set(1, 1, 0.8); mesh(SPH(0.15, 16), coatM, body, 0.18, 0.45, -0.12).scale.set(1, 1, 0.8); U.legs[0].scale.x = U.legs[1].scale.x = 1.35; U.legs[0].scale.z = U.legs[1].scale.z = 1.35; }
+  if (G.includes('heads3')) for (const s of [-1, 1]) { const h2 = head.clone(true); h2.position.set(head.position.x - 0.06, head.position.y - 0.04, s * 0.27); h2.scale.setScalar(0.78); h2.rotation.y = s * 0.35; body.add(h2); }
+  if (G.includes('glow')) { d.traverse(o => { if (o.isMesh && o.material && o.material.isMeshStandardMaterial && !o.material.emissive.getHex()) { o.material = o.material.clone(); o.material.emissive = o.material.color.clone(); o.material.emissiveIntensity = 0.28; } });
+    const s = sprite('#fff2b8', 1.6, V3(0, 0.5, 0), 0.5); d.add(s); }
+  if (G.includes('sparkle')) for (let i = 0; i < 9; i++) { const s = sprite(i % 2 ? '#ffe27a' : '#9ee7ff', 0.12 + (i % 3) * 0.05, V3(Math.cos(i * 0.7) * 0.4, 0.3 + (i % 4) * 0.18, Math.sin(i * 0.7) * 0.4), 0.9); d.add(s); }
+}
+// ---------------------------------------------------------------- you
+function figParams(T) { const p = { skin: T.skin, hair: T.hair[0], hairStyle: T.hair[1], shirt: T.shirt, pants: T.pants }, f = T.special && T.special.fig;
+  if (f === 'princess') Object.assign(p, { shirt: '#ff8fc8', pants: '#ff8fc8', hairStyle: 'long' });
+  if (f === 'nurse') Object.assign(p, { shirt: '#f6f8fa', pants: '#cfe3f5' });
+  if (f === 'military') Object.assign(p, { shirt: '#5d6b3c', pants: '#4a5530', hairStyle: 'bald' });
+  if (f === 'mage') Object.assign(p, { shirt: '#6a3fc1', pants: '#3b2680', hairStyle: 'bald' });
+  if (f === 'builder') Object.assign(p, { shirt: '#2f6fd1', pants: '#2f3b5a', hairStyle: 'bald' });
+  if (f === 'hero') Object.assign(p, { shirt: '#2a5bd7', pants: '#d6333d' });
+  if (f === 'armor') Object.assign(p, { shirt: '#9aa4b0', pants: '#5e6670', hairStyle: 'bald' });
+  if (f === 'penguin') Object.assign(p, { shirt: '#1b1d22', pants: '#1b1d22', hairStyle: 'bald' });
+  if (f === 'catsamurai') Object.assign(p, { shirt: '#c8323c', pants: '#2b2d31' });
+  return p; }
+function dressFig(F, T) {
+  const f = T.special && T.special.fig; if (!f) return; const U = F.userData, head = U.head, fig = U.fig, R = U.arms[1];
+  if (f === 'princess') { const cr = new THREE.Group(); cr.position.set(0, 0.15, 0); head.add(cr); mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.035, 18, 1, true), METAL('#f5c542'), cr);
+    for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; mesh(new THREE.ConeGeometry(0.018, 0.05, 6), METAL('#f5c542'), cr, Math.cos(a) * 0.072, 0.04, Math.sin(a) * 0.072); }
+    mesh(new THREE.ConeGeometry(0.25, 0.42, 22, 1, true), PLASTIC('#ff8fc8'), fig, 0, 0.24, 0).material.side = THREE.DoubleSide; }
+  if (f === 'nurse') { mesh(new THREE.BoxGeometry(0.1, 0.03, 0.01), PLASTIC('#2fae5b'), fig, 0, 0.72, 0.092); mesh(new THREE.BoxGeometry(0.03, 0.1, 0.01), PLASTIC('#2fae5b'), fig, 0, 0.72, 0.092);
+    mesh(new THREE.CylinderGeometry(0.11, 0.12, 0.06, 20), PLASTIC('#ffffff'), head, 0, 0.12, 0); mesh(new THREE.BoxGeometry(0.05, 0.015, 0.005), PLASTIC('#2fae5b'), head, 0, 0.125, 0.12); mesh(new THREE.BoxGeometry(0.015, 0.05, 0.005), PLASTIC('#2fae5b'), head, 0, 0.125, 0.12); }
+  if (f === 'military') { mesh(new THREE.SphereGeometry(0.13, 24, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), PLASTIC('#4a5530'), head, 0, 0.05, 0); mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.015, 24), PLASTIC('#4a5530'), head, 0, 0.05, 0); }
+  if (f === 'mage') { mesh(new THREE.ConeGeometry(0.13, 0.34, 20), PLASTIC('#6a3fc1'), head, 0, 0.26, 0); mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.015, 24), PLASTIC('#6a3fc1'), head, 0, 0.09, 0);
+    for (let i = 0; i < 4; i++) mesh(SPH(0.012, 6), GLOWM('#ffe27a', 2), head, Math.cos(i * 1.6) * 0.07, 0.18 + i * 0.04, Math.sin(i * 1.6) * 0.07 + 0.02);
+    const st = new THREE.Group(); st.position.set(0.06, -0.36, 0.07); R.add(st); mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.7, 8), std({ color: '#6b4630' }), st, 0, 0.12, 0);
+    mesh(SPH(0.05, 14), GLOWM('#bff6ff', 3), st, 0, 0.48, 0); const g = sprite('#bff6ff', 1.2, V3(0, 0.48, 0), 0.8); st.add(g); R.rotation.x = -0.5; }
+  if (f === 'builder') { mesh(new THREE.SphereGeometry(0.125, 24, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), PLASTIC('#ffd21f'), head, 0, 0.05, 0); mesh(new THREE.BoxGeometry(0.3, 0.012, 0.3), PLASTIC('#ffd21f'), head, 0, 0.05, 0.02);
+    mesh(new THREE.BoxGeometry(0.4, 0.3, 0.19), PLASTIC('#ff8a1e'), fig, 0, 0.7, 0); mesh(new THREE.BoxGeometry(0.405, 0.03, 0.195), PLASTIC('#e8e8e8'), fig, 0, 0.66, 0); }
+  if (f === 'flashlight' || f === 'mage' && false) { const fl = new THREE.Group(); fl.position.set(0.06, -0.37, 0.12); R.add(fl); mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.26, 14), std({ color: '#2b2d31', metalness: 0.5 }), fl).rotation.x = Math.PI / 2;
+    mesh(new THREE.CircleGeometry(0.05, 16), GLOWM('#fff6c0', 3), fl, 0, 0, 0.131); const beam = new THREE.Mesh(new THREE.ConeGeometry(0.5, 2.2, 24, 1, true), new THREE.MeshBasicMaterial({ color: '#fff3b0', transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }));
+    beam.rotation.x = -Math.PI / 2; beam.position.set(0, 0, 1.2); fl.add(beam); R.rotation.x = -1.3; }
+  if (f === 'hero') { const c = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.62, 4, 6), PLASTIC('#d6333d')); c.material.side = THREE.DoubleSide; const p = c.geometry.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, -Math.abs(p.getX(i)) * 0.25 - (0.31 - p.getY(i)) * 0.12);
+    c.geometry.computeVertexNormals(); c.position.set(0, 0.53, -0.11); fig.add(c); mesh(new THREE.OctahedronGeometry(0.05, 0), METAL('#f5c542'), fig, 0, 0.72, 0.095); }
+  if (f === 'glow') { const s = sprite('#fff2b8', 1.9, V3(0, 1.0, 0), 0.55); F.add(s); for (let i = 0; i < 8; i++) { const q = sprite('#ffe27a', 0.12, V3(Math.cos(i) * 0.45, 0.4 + i * 0.16, Math.sin(i) * 0.3), 0.9); F.add(q); } }
+  if (f === 'armor') { mesh(new THREE.BoxGeometry(0.4, 0.34, 0.2), METAL('#5fa86b'), fig, 0, 0.68, 0); for (const s of [-1, 1]) mesh(SPH(0.07, 12), METAL('#5fa86b'), fig, s * 0.2, 0.83, 0).scale.y = 0.6;
+    mesh(new THREE.SphereGeometry(0.125, 24, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), METAL('#5fa86b'), head, 0, 0.03, 0); for (const s of [-1, 1]) mesh(new THREE.ConeGeometry(0.02, 0.09, 8), METAL('#f5c542'), head, s * 0.07, 0.15, 0).rotation.z = -s * 0.5; }
+  if (f === 'catsamurai') { for (const s of [-1, 1]) mesh(new THREE.ConeGeometry(0.035, 0.07, 4), PLASTIC('#2b2d31'), head, s * 0.065, 0.16, 0); mesh(new THREE.TorusGeometry(0.105, 0.012, 6, 24), PLASTIC('#ffffff'), head, 0, 0.06, 0).rotation.x = Math.PI / 2;
+    const sw = new THREE.Group(); sw.position.set(0.06, -0.37, 0.08); R.add(sw); mesh(new THREE.BoxGeometry(0.02, 0.5, 0.01), std({ color: '#d9b38a' }), sw, 0, 0.25, 0); mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.01, 12), std({ color: '#2b2d31' }), sw, 0, 0.02, 0); R.rotation.x = -0.6; }
+  if (f === 'teacher') { for (const s of [-1, 1]) mesh(new THREE.TorusGeometry(0.03, 0.006, 6, 14), PLASTIC('#1b1d22'), head, s * 0.04, 0.02, 0.102); mesh(new THREE.BoxGeometry(0.03, 0.006, 0.006), PLASTIC('#1b1d22'), head, 0, 0.02, 0.102);
+    const bk = mesh(new THREE.BoxGeometry(0.16, 0.2, 0.04), PLASTIC('#c8323c'), R, 0.06, -0.38, 0.1); bk.rotation.y = 0.3; }
+  if (f === 'penguin') { const belly = mesh(new THREE.BoxGeometry(0.26, 0.32, 0.01), PLASTIC('#ffffff'), fig, 0, 0.66, 0.09); mesh(new THREE.SphereGeometry(0.125, 24, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), PLASTIC('#1b1d22'), head, 0, 0.04, -0.01);
+    const bk = mesh(new THREE.ConeGeometry(0.025, 0.07, 8), PLASTIC('#ff9f1c'), head, 0, 0.1, 0.12); bk.rotation.x = Math.PI / 2; for (const s of [-1, 1]) mesh(new THREE.BoxGeometry(0.1, 0.02, 0.14), PLASTIC('#ff9f1c'), fig, s * 0.095, 0.02, 0.04); }
+}
+// ---------------------------------------------------------------- your home
+function dressHome(home, dh, T) {
+  const H = (T.special && T.special.house) || [];
+  if (H.includes('mansion')) { home.scale.setScalar(1.28); const t = new THREE.Group(); t.position.set(-2.05, 0, 0.5); home.add(t); cottage(t, T.roof, '', { scale: 0.55, wall: T.wall, seed: 7 }); }
+  if (H.includes('fairy')) { const cols = ['#ffd84a', '#ff7eb6', '#7ff3ff', '#b6ff8a', '#ffb347'];
+    for (let i = 0; i < 36; i++) { const a = i / 36 * Math.PI * 2; const y = 2.33 + Math.sin(i * 1.7) * 0.03 - Math.abs(Math.sin(a * 3)) * 0.12; const b = mesh(SPH(0.045, 8), GLOWM(cols[i % cols.length], 2.2), home, Math.cos(a) * 2.0, y, Math.sin(a) * 2.0); b.castShadow = false; }
+    for (let i = 0; i < 10; i++) { const b = mesh(SPH(0.03, 8), GLOWM(cols[i % cols.length], 2.2), dh.s, -0.4 + i * 0.09, 0.62 + Math.abs(i - 4.5) * -0.02, 0.42); b.castShadow = false; } }
+  if (H.includes('golden')) dh.s.traverse(o => { if (o.isMesh && o.material && !o.material.isMeshBasicMaterial) o.material = METAL('#f2c14e'); });
+  if (H.includes('bright')) { const pl = new THREE.PointLight('#fff1c0', 6, 9); pl.position.set(0, 2.2, 1.6); home.add(pl);
+    for (const [x, z] of [[-1.6, 1.3], [1.6, 1.3]]) { const lp = new THREE.Group(); lp.position.set(x, 0, z); home.add(lp); mesh(new THREE.CylinderGeometry(0.04, 0.05, 1.6, 10), std({ color: '#2b2d31', metalness: 0.5 }), lp, 0, 0.8, 0);
+      mesh(SPH(0.13, 14), GLOWM('#fff6c0', 3), lp, 0, 1.68, 0); const s = sprite('#fff1c0', 1.4, V3(0, 1.68, 0), 0.9); lp.add(s); }
+    const g = sprite('#ffd98a', 3.4, V3(0, 1.4, 1.25), 0.45); home.add(g); }
+  if (H.includes('flowers')) { const cols = ['#ff7eb6', '#ffd84a', '#ffffff', '#c94fd6', '#ff6b6b']; for (const sd of [-1, 1]) { const bx = new THREE.Group(); bx.position.set(sd * 0.62, 1.35, 1.12); bx.rotation.y = sd * -0.45; home.add(bx);
+      mesh(new THREE.BoxGeometry(0.5, 0.12, 0.16), std({ color: '#6b4630' }), bx); for (let i = 0; i < 6; i++) mesh(SPH(0.05, 8), std({ color: cols[i % 5] }), bx, -0.2 + i * 0.08, 0.1, 0); }
+    for (let i = 0; i < 14; i++) { const a = Math.PI * 0.15 + i / 14 * Math.PI * 0.7; mesh(SPH(0.07, 8), std({ color: cols[i % 5] }), home, Math.cos(a) * 1.55, 0.08, Math.sin(a) * 1.55); } }
+  if (H.includes('cherry')) { const tr = new THREE.Group(); tr.position.set(-2.4, 0, -3.6); stage.add(tr); mesh(new THREE.CylinderGeometry(0.1, 0.16, 1.6, 10), std({ color: '#6b4630' }), tr, 0, 0.8, 0);
+    const r = rng(5); for (let i = 0; i < 14; i++) mesh(SPH(0.32 + r() * 0.2, 14), std({ color: i % 3 ? '#ffb7d5' : '#ff8fc0', roughness: 0.8 }), tr, (r() - 0.5) * 1.2, 1.7 + r() * 0.7, (r() - 0.5) * 1.1);
+    for (let i = 0; i < 24; i++) { const p = mesh(new THREE.CircleGeometry(0.035, 6), std({ color: '#ffc6dd', side: THREE.DoubleSide }), tr, (r() - 0.5) * 2.2, 0.02, (r() - 0.5) * 2.2); p.rotation.x = -Math.PI / 2; } }
+  if (H.includes('vip')) { const cp = mesh(new THREE.PlaneGeometry(0.8, 3.2), std({ color: '#c8212f', roughness: 0.9 }), home, 0, 0.015, 2.7); cp.rotation.x = -Math.PI / 2;
+    for (const sd of [-1, 1]) for (const z of [1.6, 3.4]) { mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.6, 12), METAL('#f2c14e'), home, sd * 0.6, 0.3, z); mesh(SPH(0.06, 10), METAL('#f2c14e'), home, sd * 0.6, 0.62, z); }
+    for (const sd of [-1, 1]) { const rope = mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.8, 8), std({ color: '#7a1020' }), home, sd * 0.6, 0.5, 2.5); rope.rotation.x = Math.PI / 2; }
+    signPlane('VIP', 0.6, 0.26, home, 0, 0.95, 3.45, { bg: '#1b1d22', fg: '#f5c542', border: '#f5c542' }); }
+  if (H.includes('wall')) { const sm = std({ map: stoneTex('#9d958c'), roughness: 0.95 }); for (const [x, z, ry] of [[-3.5, -2.4, 1.2], [-3.0, -3.6, 0.7], [-2.1, -4.4, 0.25], [4.0, -2.2, -1.2], [3.7, -4.6, -0.5]]) { const b = mesh(new THREE.BoxGeometry(1.3, 0.75, 0.45), sm, stage, x, 0.37, z); b.rotation.y = ry;
+      for (let k = -1; k <= 1; k += 2) mesh(new THREE.BoxGeometry(0.28, 0.2, 0.47), sm, b, k * 0.45, 0.47, 0); } }
+  if (H.includes('barrier')) { const d = new THREE.Mesh(new THREE.SphereGeometry(5.4, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#7ff3ff', transparent: true, opacity: 0.17, depthWrite: false, side: THREE.DoubleSide, toneMapped: false, wireframe: false }));
+    d.position.set(0.4, 0, -2.6); stage.add(d); const ring = mesh(new THREE.TorusGeometry(5.4, 0.04, 6, 80), GLOWM('#7ff3ff', 2), stage, 0.4, 0.02, -2.6); ring.rotation.x = Math.PI / 2; ring.castShadow = false; }
+  if (H.includes('school')) { const b = new THREE.Group(); b.position.set(-2.7, 0, 1.4); b.rotation.y = 0.6; home.add(b); mesh(new THREE.BoxGeometry(0.06, 1.3, 0.06), std({ color: '#6b4630' }), b, -0.5, 0.65, 0); mesh(new THREE.BoxGeometry(0.06, 1.3, 0.06), std({ color: '#6b4630' }), b, 0.5, 0.65, 0);
+    signPlane('DOG SCHOOL', 1.2, 0.42, b, 0, 1.15, 0.04, { bg: '#2f5d3a', fg: '#ffffff', border: '#6b4630' }); }
+  if (H.includes('shop')) { const b = new THREE.Group(); b.position.set(-2.7, 0, 1.4); b.rotation.y = 0.6; home.add(b); for (const x of [-0.5, 0.5]) mesh(new THREE.BoxGeometry(0.06, 1.3, 0.06), std({ color: '#2b2d31' }), b, x, 0.65, 0);
+    signPlane('LIGHT SHOP', 1.2, 0.42, b, 0, 1.15, 0.04, { bg: '#1b1d22', fg: '#ffe27a', border: '#ffe27a' }); }
+}
+// ---------------------------------------------------------------- extra dogs
+function extraDogs(T) { const n = (T.special && T.special.dogs) || 0, out = []; const spots = [[1.55, -0.9, 0.85], [-1.55, 0.35, 0.8], [1.9, 0.5, 0.75], [-1.2, -1.6, 0.75], [0.15, 0.75, 0.7]];
+  for (let i = 0; i < Math.min(n - 1, spots.length); i++) { const [x, z, s] = spots[i]; out.push(dog({ breed: (T.breed + 1 + i * 2) % 8, pose: i % 2 ? 'sit' : 'stand', x, z, ry: FACE + (i % 2 ? 0.4 : -0.3), size: s, headUp: 0.15 })); }
+  return out; }
+
 
 // ================================================================= PLANET ID SITE
 GH = () => 0;                      // the site stage is flat
@@ -740,10 +1001,10 @@ function traits(h, pos) {
   const n = roll(h, 'breed', 1000); const breed = n < 200 ? 8 : Math.min(7, Math.floor((n - 200) / (800 / 8)));   // 20% Star Pup (legendary)
   const rarity = breed === 8 ? 'LEGENDARY' : roll(h, 'shiny', 100) < 50 ? 'RARE' : 'COMMON';                 // rest: 40% rare, 40% common
   const name = pickH(h, 'name', DOG_NAMES);
-  return { h, pos, breed: breed % 9, breedName: BREED_NAMES[breed % 9], rarity, dogName: name, quirk: pickH(h, 'quirk', QUIRKS),
+  return applyReq({ h, pos, breed: breed % 9, breedName: BREED_NAMES[breed % 9], rarity, dogName: name, quirk: pickH(h, 'quirk', QUIRKS),
     skin: pickH(h, 'skin', SKINS), hair: pickH(h, 'hair', HAIRS), shirt: pickH(h, 'shirt', SHIRTS), pants: pickH(h, 'pants', ['#2f3b5a', '#5e6266', '#2f3b32', '#3b4a6b']),
     roof: pickH(h, 'roof', ROOFS), wall: pickH(h, 'wall', WALLS),
-    house: pos ? pos : null, street: pos ? (pos > 2000 ? 'Monster Cave Road' : STREETS[Math.floor((pos - 1) / 40) % STREETS.length]) : null };
+    house: pos ? pos : null, street: pos ? (pos > 2000 ? 'Monster Cave Road' : STREETS[Math.floor((pos - 1) / 40) % STREETS.length]) : null });
 }
 // ---------------------------------------------------------------- follower list: stored hashed, so nobody can read it from the site
 let FOLLOW = { salt: 'dogplanet-v1', hashes: [] };
@@ -807,9 +1068,10 @@ function buildStage(T) {
   const home = new THREE.Group(); home.position.set(0.2, 0, -5.2); stage.add(home);
   cottage(home, T.roof, T.pos ? '@' + T.h : '@' + T.h + ' ?', { wall: T.wall, seed: (cyrb(T.h) % 97) + 1 });
   const dh = dogHouse(stage, T.roof); dh.s.position.set(2.9, 0, -3.6); dh.s.rotation.y = -0.45;
+  if (T.pos) dressHome(home, dh, T);
   if (T.pos) {
-    ACT.fig = minifig({ skin: T.skin, hair: T.hair[0], hairStyle: T.hair[1], shirt: T.shirt, pants: T.pants, x: -0.55, z: -0.4, ry: 0.22, wave: true });
-    ACT.dog = dog({ breed: T.breed, pose: 'sit', x: 0.65, z: -0.05, ry: FACE + 0.25, size: 1.15, headUp: 0.15 }); ACT.mode = 'wag';
+    ACT.fig = minifig({ ...figParams(T), x: -0.55, z: -0.4, ry: 0.22, wave: true }); dressFig(ACT.fig, T);
+    ACT.dog = dog({ breed: T.breed, pose: 'sit', x: 0.65, z: -0.05, ry: FACE + 0.25, size: 1.15, headUp: 0.15 }); ACT.mode = 'wag'; dressDog(ACT.dog, T); ACT.pups = extraDogs(T);
   } else {
     // not a follower yet: the dog waits alone on an empty landing pad, next to a hologram of "you"
     ACT.dog = dog({ breed: T.breed, mood: 'scared', pose: 'sit', x: 0.6, z: -0.05, ry: FACE + 0.15, size: 1.15, headUp: 0.25 }); ACT.mode = 'tremble';
@@ -832,12 +1094,13 @@ function showCard(T) {
   $('quirk').textContent = `“${T.dogName} ${T.quirk}”`;
   $('homeline').textContent = T.pos ? `🏠 House ${T.house} · ${T.street}` : `🏠 Your cottage is reserved, but empty`;
   $('wait').textContent = `${T.dogName} is waiting for you on the landing pad…`;
+  $('req').textContent = T.special ? '⭐ Your request: ' + T.special.label : ''; $('req').hidden = !T.special;
   c.hidden = false; $('actions').hidden = false; $('follow').hidden = !!T.pos; $('save').hidden = !T.pos;
 }
 async function find(raw) {
   const h = cleanHandle(raw); if (!h) return;
   $('who').value = h; history.replaceState(null, '', '?u=' + encodeURIComponent(h) + (QS.has('demo') ? '&demo' : ''));
-  const T = traits(h, await followPos(h)); buildStage(T); showCard(T);
+  const T = traits(h, (await followPos(h)) || null); buildStage(T); showCard(T);
 }
 $('form').addEventListener('submit', (e) => { e.preventDefault(); find($('who').value); });
 $('follow').href = IG_URL;
@@ -877,7 +1140,7 @@ function frame() {
   if (glc.clientWidth !== lastW || glc.clientHeight !== lastH) resize();   // the box changes size when the card appears: never draw stretched
   const t = (performance.now() - t0) / 1000, a = Math.sin(t * 0.25) * 0.28;
   cam.position.set(0.3 + Math.sin(a) * 6.2, 1.55, -0.6 + Math.cos(a) * 6.2); cam.lookAt(0.15, 0.95, -1.3);
-  if (ACT) { if (ACT.dog) animDog(ACT.dog, t, ACT.mode, 0);
+  if (ACT) { if (ACT.dog) animDog(ACT.dog, t, ACT.mode, 0); (ACT.pups || []).forEach((p, i) => animDog(p, t, 'wag', i * 1.7 + 1));
     if (ACT.fig) { const A = ACT.fig.userData.arms[0]; A.rotation.z = -2.3 + Math.sin(t * 6) * 0.35; }
     if (ACT.ghost) { holoMat.opacity = 0.32 + 0.14 * Math.sin(t * 3); ACT.ghost.position.y = 0.04 + Math.sin(t * 2) * 0.03; }
     if (ACT.pad) ACT.pad.material.opacity = 0.55 + 0.35 * Math.sin(t * 3); }
